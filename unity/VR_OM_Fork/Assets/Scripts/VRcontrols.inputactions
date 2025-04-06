@@ -6,7 +6,7 @@
             "id": "0e9a8b4a-43a4-4e41-9774-ab5df1b098fe",
             "actions": [
                 {
-                    "name": "New action",
+                    "name": "Move",
                     "type": "Value",
                     "id": "bb63ace3-8f12-4a2d-b8c7-2894dd9cbafa",
                     "expectedControlType": "Vector2",
@@ -18,12 +18,12 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "fdb7ebfc-853a-4cde-b9b2-2c485c88ceb8",
+                    "id": "c31ae41a-3899-4353-a4fb-1468556b2721",
                     "path": "",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

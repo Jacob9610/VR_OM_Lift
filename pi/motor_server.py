@@ -54,6 +54,7 @@ def stop_dc():
     GPIO.output(IN4, GPIO.LOW)
 
 def drive(left_speed, right_speed):
+    print(f"Driving: left={left_speed}, right={right_speed}")
     # Left motor
     if left_speed > 0:
         GPIO.output(IN2, GPIO.LOW)
@@ -141,17 +142,17 @@ try:
 
                     # Simple named commands
                     elif cmd.get("command") == "forward":
-                        drive(1.0, 1.0)
-                    elif cmd.get("command") == "backward":
                         drive(-1.0, -1.0)
+                    elif cmd.get("command") == "backward":
+                        drive(1.0, 1.0)
                     elif cmd.get("command") == "left":
-                        drive(-0.8, 0.8)
+                        drive(-0.4, -1.0)
                     elif cmd.get("command") == "right":
-                        drive(0.8, -0.8)
+                        drive(-1.0, -0.4)
                     elif cmd.get("command") == "spin_left":
-                        drive(-1.0, 1.0)
-                    elif cmd.get("command") == "spin_right":
                         drive(1.0, -1.0)
+                    elif cmd.get("command") == "spin_right":
+                        drive(-1.0, 1.0)
                     elif cmd.get("command") == "stop":
                         stop_dc()
                     elif cmd.get("command") == "lift_up":
@@ -163,15 +164,15 @@ try:
                     elif cmd.get("command") == "lift_max":
                         threading.Thread(target=lift_to, args=(MAX_LIFT_STEPS,)).start()
                     elif cmd.get("command") == "forward_slow":
-                        drive(0.4, 0.4)
-                    elif cmd.get("command") == "backward_slow":
                         drive(-0.4, -0.4)
+                    elif cmd.get("command") == "backward_slow":
+                        drive(0.4, 0.4)
                     elif cmd.get("command") == "nudge_left":
-                        drive(-0.6, 0.6)
+                        drive(0.6, -0.6)
                         time.sleep(0.2)
                         stop_dc()
                     elif cmd.get("command") == "nudge_right":
-                        drive(0.6, -0.6)
+                        drive(-0.6, 0.6)
                         time.sleep(0.2)
                         stop_dc()
                     elif cmd.get("command") == "all_stop":
