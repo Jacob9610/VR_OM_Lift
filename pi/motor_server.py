@@ -36,42 +36,43 @@ for pin in STEP_PINS:
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, 0)
 
+# PWM setup for speed control
+LEFT_PWM = GPIO.PWM(IN1, 100)  # 100 Hz
+RIGHT_PWM = GPIO.PWM(IN3, 100)
+LEFT_PWM.start(0)
+RIGHT_PWM.start(0)
+
 # Stepper position tracking
 current_step_pos = 0
 MAX_LIFT_STEPS = 512
 
 # ====== DC Motor Functions ======
 def stop_dc():
-    GPIO.output(IN1, GPIO.LOW)
+    LEFT_PWM.ChangeDutyCycle(0)
+    RIGHT_PWM.ChangeDutyCycle(0)
     GPIO.output(IN2, GPIO.LOW)
-    GPIO.output(IN3, GPIO.LOW)
     GPIO.output(IN4, GPIO.LOW)
 
 def drive(left_speed, right_speed):
-    # Simple binary ON/OFF mapping for now
-    # Positive = forward, Negative = backward, 0 = stop
-
     # Left motor
     if left_speed > 0:
-        GPIO.output(IN1, GPIO.HIGH)
         GPIO.output(IN2, GPIO.LOW)
+        LEFT_PWM.ChangeDutyCycle(min(left_speed, 1.0) * 100)
     elif left_speed < 0:
-        GPIO.output(IN1, GPIO.LOW)
         GPIO.output(IN2, GPIO.HIGH)
+        LEFT_PWM.ChangeDutyCycle(min(abs(left_speed), 1.0) * 100)
     else:
-        GPIO.output(IN1, GPIO.LOW)
-        GPIO.output(IN2, GPIO.LOW)
+        LEFT_PWM.ChangeDutyCycle(0)
 
     # Right motor
     if right_speed > 0:
-        GPIO.output(IN3, GPIO.HIGH)
         GPIO.output(IN4, GPIO.LOW)
+        RIGHT_PWM.ChangeDutyCycle(min(right_speed, 1.0) * 100)
     elif right_speed < 0:
-        GPIO.output(IN3, GPIO.LOW)
         GPIO.output(IN4, GPIO.HIGH)
+        RIGHT_PWM.ChangeDutyCycle(min(abs(right_speed), 1.0) * 100)
     else:
-        GPIO.output(IN3, GPIO.LOW)
-        GPIO.output(IN4, GPIO.LOW)
+        RIGHT_PWM.ChangeDutyCycle(0)
 
 # ====== Stepper Motor Functions ======
 def step_motor(steps, direction='up', delay=0.001):
@@ -95,6 +96,14 @@ def safe_lift(direction, steps=256):
         current_step_pos -= steps
     else:
         print(f"Lift blocked: would exceed limits (position = {current_step_pos})")
+
+def lift_to(position):
+    global current_step_pos
+    steps = position - current_step_pos
+    if steps > 0:
+        safe_lift('up', steps)
+    elif steps < 0:
+        safe_lift('down', -steps)
 
 # ====== Socket Server ======
 HOST = '0.0.0.0'
@@ -129,6 +138,44 @@ try:
                         threading.Thread(target=safe_lift, args=('up',)).start()
                     elif cmd.get("lift") == "down":
                         threading.Thread(target=safe_lift, args=('down',)).start()
+
+                    # Simple named commands
+                    elif cmd.get("command") == "forward":
+                        drive(1.0, 1.0)
+                    elif cmd.get("command") == "backward":
+                        drive(-1.0, -1.0)
+                    elif cmd.get("command") == "left":
+                        drive(-0.8, 0.8)
+                    elif cmd.get("command") == "right":
+                        drive(0.8, -0.8)
+                    elif cmd.get("command") == "spin_left":
+                        drive(-1.0, 1.0)
+                    elif cmd.get("command") == "spin_right":
+                        drive(1.0, -1.0)
+                    elif cmd.get("command") == "stop":
+                        stop_dc()
+                    elif cmd.get("command") == "lift_up":
+                        threading.Thread(target=safe_lift, args=('up',)).start()
+                    elif cmd.get("command") == "lift_down":
+                        threading.Thread(target=safe_lift, args=('down',)).start()
+                    elif cmd.get("command") == "lift_zero":
+                        threading.Thread(target=lift_to, args=(0,)).start()
+                    elif cmd.get("command") == "lift_max":
+                        threading.Thread(target=lift_to, args=(MAX_LIFT_STEPS,)).start()
+                    elif cmd.get("command") == "forward_slow":
+                        drive(0.4, 0.4)
+                    elif cmd.get("command") == "backward_slow":
+                        drive(-0.4, -0.4)
+                    elif cmd.get("command") == "nudge_left":
+                        drive(-0.6, 0.6)
+                        time.sleep(0.2)
+                        stop_dc()
+                    elif cmd.get("command") == "nudge_right":
+                        drive(0.6, -0.6)
+                        time.sleep(0.2)
+                        stop_dc()
+                    elif cmd.get("command") == "all_stop":
+                        stop_dc()
 
                 except json.JSONDecodeError:
                     print("Invalid JSON received")
