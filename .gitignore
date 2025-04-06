@@ -1,2 +1,4 @@
 mjpg-streamer/
 mjpg-streamer/
+# Ignore mjpg-streamer build output
+mjpg-streamer/mjpg-streamer-experimental/_build/
