@@ -2,3 +2,28 @@ mjpg-streamer/
 mjpg-streamer/
 # Ignore mjpg-streamer build output
 mjpg-streamer/mjpg-streamer-experimental/_build/
+
+# Unity folders
+unity/**/[Ll]ibrary/
+unity/**/[Tt]emp/
+unity/**/[Oo]bj/
+unity/**/[Bb]uild/
+unity/**/[Bb]uilds/
+unity/**/[Ll]ogs/
+unity/**/[Mm]emoryCaptures/
+
+# IDE clutter
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.tmp
+
+# OS-specific
+.DS_Store
+.vscode/
+
+# mjpg-streamer artifacts
+mjpg-streamer/mjpg-streamer-experimental/_build/
+
